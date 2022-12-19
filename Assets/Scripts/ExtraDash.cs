@@ -25,11 +25,13 @@ public class ExtraDash : MonoBehaviour
     }
 
     void OnTriggerEnter2D(Collider2D collider) {
-        playerScript.dashCount += 1;
-        myRenderer.enabled = false;
-        myCollider.enabled = false;
-        glow.Stop();
-        explosion.Play();
-        Destroy(gameObject,2f);
+        if(collider.gameObject.tag == "Player"){
+            playerScript.dashCount += 1;
+            myRenderer.enabled = false;
+            myCollider.enabled = false;
+            glow.Stop();
+            explosion.Play();
+            Destroy(gameObject,2f);
+        }
     }
 }

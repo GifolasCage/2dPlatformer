@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,6 +7,7 @@ public class CharacterController : MonoBehaviour
 {
     private Vector2 move;
     private Rigidbody2D rb;
+    private SpriteRenderer spriteRenderer;
     
     private bool jumpPressed;
     private bool jumpReleased;
@@ -30,17 +32,22 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private float dashPower = 500f;
     [SerializeField] private float dashTime = 0.2f;
     [SerializeField] private int maxDashCount = 1;
+    [SerializeField] private float acceleration = 10f;
+    [SerializeField] private float deAcceleration = 10f;
+    [SerializeField] private float velPower = 10f;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private ParticleSystem dashParticles;
     // Start is called before the first frame update
-    void Start(){
+    void Awake(){
         rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
     void Update(){
         InputHandler();
         JumpHandler();
+        ChangeColor();
 
         if(move.x < 0 && !isFacingRight){
             FlipThePlayer();
@@ -81,10 +88,16 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+
     private void FixedUpdate() {
+        float targetSpeed = move.x * moveSpeed;
+        float speedDiff = targetSpeed - rb.velocity.x;
+        float accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? acceleration : deAcceleration;
+        float movement = Mathf.Pow(Mathf.Abs(speedDiff) * accelRate, velPower) * Mathf.Sign(speedDiff);
         //Handle horizontal movement
         if(!isDashing){
-            rb.velocity = new Vector2(move.x * moveSpeed, rb.velocity.y);
+            //rb.velocity = new Vector2(move.x * moveSpeed, rb.velocity.y);
+            rb.AddForce(movement*Vector2.right);
         }
 
         //Clamp the fall speed
@@ -158,5 +171,14 @@ public class CharacterController : MonoBehaviour
         yield return new WaitForSeconds(dashTime);
         isDashing = false;
         rb.gravityScale = gravity;
+    }
+    private void ChangeColor()
+    {
+        if(dashCount>0){
+            spriteRenderer.color = Color.blue;
+        }
+        else{
+            spriteRenderer.color = Color.gray;
+        }
     }
 }
