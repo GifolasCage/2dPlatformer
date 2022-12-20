@@ -14,18 +14,19 @@ public class CharacterController : MonoBehaviour
     private float jumpBufferTime;
     private float coyoteTimeTimer;
     private float wallJumpTimeTimer;
-    private int extraJumpsRemaining;
     private bool dashPressed;
     private bool isDashing;
     private Vector2 dashDir;
     private bool isFacingRight;
     private bool isWallSliding;
     public int dashCount;
+    private int extraJumpCount;
     private float lastVelocity;
 
     [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 10f;
     [SerializeField] private float maxFallSpeed = 30f;
+    [SerializeField] private float maxHorizontalSpeed = 30f;
     [SerializeField] private float acceleration = 10f;
     [SerializeField] private float deAcceleration = 10f;
     [SerializeField] private float wallSlide = 1f;
@@ -34,8 +35,11 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private float gravityScaleFalling = 12f;
     [Header("Jump Settings")]
     [SerializeField] private float jumpStrength = 30f;
+    [SerializeField] private float extraJumpStrength = 30f;
     [SerializeField] private float wallJumpStrengthY = 30f;
     [SerializeField] private float wallJumpStrengthX = 30f;
+    [SerializeField] private int maxExtraJumpCount = 1;
+
     [SerializeField] private float jumpBuffer = 0.1f;
     [SerializeField] private float coyoteTime = 0.1f;
     [SerializeField] private float wallJumpTime = 0.1f;
@@ -43,12 +47,13 @@ public class CharacterController : MonoBehaviour
     [Header("Dash Settings")]
     [SerializeField] private float dashPower = 500f;
     [SerializeField] private float dashTime = 0.2f;
-    [SerializeField] private int maxDashCount = 1;
+    [SerializeField] public int maxDashCount = 1;
     [Header("Initilization")]
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private LayerMask wallLayer;
     [SerializeField] private ParticleSystem dashParticles;
     [SerializeField] private ParticleSystem dustParticles;
+    [SerializeField] private Transform snowParticlesTransform;
     // Start is called before the first frame update
     void Awake(){
         rb = GetComponent<Rigidbody2D>();
@@ -60,6 +65,7 @@ public class CharacterController : MonoBehaviour
         InputHandler();
         JumpHandler();
         ChangeColor();
+        MoveSnow();
 
         if(move.x < 0 && !isFacingRight && !isWallSliding){
             FlipThePlayer();
@@ -109,6 +115,10 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    private void MoveSnow()
+    {
+        snowParticlesTransform.position = new Vector3(transform.position.x, transform.position.y + 20f, 0f);
+    }
 
     private void FixedUpdate() {
         float targetSpeed = move.x * moveSpeed;
@@ -120,9 +130,15 @@ public class CharacterController : MonoBehaviour
             rb.AddForce(movement*Vector2.right);
         }
 
-        //Clamp the fall speed
+        //Clamp the fall & horizontal speed
         if(rb.velocity.y < -maxFallSpeed && !isDashing){
             rb.velocity = new Vector2(rb.velocity.x, -maxFallSpeed);
+        }
+        if(rb.velocity.x > maxHorizontalSpeed){
+            rb.velocity = new Vector2(maxHorizontalSpeed, rb.velocity.y);
+        }
+        if(rb.velocity.x < -maxHorizontalSpeed){
+            rb.velocity = new Vector2(-maxHorizontalSpeed, rb.velocity.y);
         }
 
         //Check if the player is on wall
@@ -145,6 +161,13 @@ public class CharacterController : MonoBehaviour
             jumpBufferTime = 0f;
         }
 
+        //Handle extra jumps
+        if(jumpPressed && !isGrounded() && !isWallSliding){
+            if(extraJumpCount>0){
+                extraJumpCount -= 1;
+                ExtraJump();
+            }
+        }
         //Handle jumpbutton released
         if(jumpReleased){
             rb.gravityScale = gravityScaleFalling;
@@ -157,7 +180,7 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-
+    //Gather input
     void InputHandler(){
         move = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         jumpPressed = Input.GetButtonDown("Jump");
@@ -171,13 +194,15 @@ public class CharacterController : MonoBehaviour
         Vector2 direction = Vector2.down;
         float rayDistance = 1f;
 
-        RaycastHit2D hit = Physics2D.Raycast(position, direction,rayDistance,groundLayer);
+        RaycastHit2D hit = Physics2D.Raycast(position, direction,rayDistance,groundLayer | wallLayer);
         if(hit.collider!= null){
+            extraJumpCount = maxExtraJumpCount;
             return true;
         }
         return false;
     }
 
+    //Check if the player is against a wall and pushing towards it
     bool isOnWall(){
         Vector2 position = transform.position;
         Vector2 direction = Vector2.right;
@@ -186,13 +211,11 @@ public class CharacterController : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(position, -direction,rayDistance,wallLayer);
         if(hit.collider!= null && move.x < -0.5 && isFacingRight && rb.velocity.y < apexModifier){
             isWallSliding  = true;
-            Debug.Log("Walled Left");
             return true;
         }
         RaycastHit2D hit2 = Physics2D.Raycast(position, direction,rayDistance,wallLayer);
         if(hit2.collider!= null && move.x > 0.5 && !isFacingRight && rb.velocity.y < apexModifier){
             isWallSliding  = true;
-            Debug.Log("Walled Right");
             return true;
         }
         isWallSliding = false;
@@ -204,6 +227,11 @@ public class CharacterController : MonoBehaviour
         dustParticles.Play();
     }
 
+    void ExtraJump(){
+        rb.velocity = new Vector2(rb.velocity.x, extraJumpStrength);
+        dustParticles.Play();
+    }
+
     void WallJump(){
         dustParticles.Play();
         if(isWallSliding){
@@ -211,6 +239,7 @@ public class CharacterController : MonoBehaviour
         }
         else{
             rb.velocity = new Vector2(rb.velocity.x, wallJumpStrengthY);
+            extraJumpCount = maxExtraJumpCount;
         }
     }
 
