@@ -13,30 +13,42 @@ public class CharacterController : MonoBehaviour
     private bool jumpReleased;
     private float jumpBufferTime;
     private float coyoteTimeTimer;
+    private float wallJumpTimeTimer;
     private int extraJumpsRemaining;
     private bool dashPressed;
     private bool isDashing;
     private Vector2 dashDir;
     private bool isFacingRight;
+    private bool isWallSliding;
     public int dashCount;
     private float lastVelocity;
 
+    [Header("Movement Settings")]
     [SerializeField] private float moveSpeed = 10f;
-    [SerializeField] private float jumpStrength = 30f;
-    [SerializeField] private float jumpBuffer = 0.1f;
-    [SerializeField] private float coyoteTime = 0.1f;
+    [SerializeField] private float maxFallSpeed = 30f;
+    [SerializeField] private float acceleration = 10f;
+    [SerializeField] private float deAcceleration = 10f;
+    [SerializeField] private float wallSlide = 1f;
+    [SerializeField] private float velPower = 10f;
     [SerializeField] private float gravityScaleGrounded = 1f;
     [SerializeField] private float gravityScaleFalling = 12f;
+    [Header("Jump Settings")]
+    [SerializeField] private float jumpStrength = 30f;
+    [SerializeField] private float wallJumpStrengthY = 30f;
+    [SerializeField] private float wallJumpStrengthX = 30f;
+    [SerializeField] private float jumpBuffer = 0.1f;
+    [SerializeField] private float coyoteTime = 0.1f;
+    [SerializeField] private float wallJumpTime = 0.1f;
     [SerializeField] private float apexModifier = 30f;
-    [SerializeField] private float maxFallSpeed = 30f;
+    [Header("Dash Settings")]
     [SerializeField] private float dashPower = 500f;
     [SerializeField] private float dashTime = 0.2f;
     [SerializeField] private int maxDashCount = 1;
-    [SerializeField] private float acceleration = 10f;
-    [SerializeField] private float deAcceleration = 10f;
-    [SerializeField] private float velPower = 10f;
+    [Header("Initilization")]
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask wallLayer;
     [SerializeField] private ParticleSystem dashParticles;
+    [SerializeField] private ParticleSystem dustParticles;
     // Start is called before the first frame update
     void Awake(){
         rb = GetComponent<Rigidbody2D>();
@@ -49,28 +61,29 @@ public class CharacterController : MonoBehaviour
         JumpHandler();
         ChangeColor();
 
-        if(move.x < 0 && !isFacingRight){
+        if(move.x < 0 && !isFacingRight && !isWallSliding){
             FlipThePlayer();
         }
-        if(move.x > 0 && isFacingRight){
+        if(move.x > 0 && isFacingRight && !isWallSliding){
             FlipThePlayer();
         }
 
         //Check if the player is grounded
-        if(isGrounded()){
+        if(isGrounded() && !isWallSliding){
             rb.gravityScale = gravityScaleGrounded;
             coyoteTimeTimer = coyoteTime;
             dashCount = maxDashCount;
         }
         else{
             coyoteTimeTimer -= Time.deltaTime;
-        }
+        }    
 
         //Change gravity if the y velocity is lower than the set apex.
         if(rb.velocity.y < apexModifier && !isGrounded() && !isDashing){
             rb.gravityScale = gravityScaleFalling;
         }
 
+        //Dash
         if(dashPressed && dashCount > 0){
             dashDir = move.normalized;
             dashCount -= 1;
@@ -86,6 +99,14 @@ public class CharacterController : MonoBehaviour
                 StartCoroutine(Dash(dashDir));
             }
         }
+
+        //Check if the player is wallsliding
+        if(isWallSliding){
+            wallJumpTimeTimer = wallJumpTime;
+        }
+        else{
+            wallJumpTimeTimer -= Time.deltaTime;
+        }
     }
 
 
@@ -96,15 +117,18 @@ public class CharacterController : MonoBehaviour
         float movement = Mathf.Pow(Mathf.Abs(speedDiff) * accelRate, velPower) * Mathf.Sign(speedDiff);
         //Handle horizontal movement
         if(!isDashing){
-            //rb.velocity = new Vector2(move.x * moveSpeed, rb.velocity.y);
             rb.AddForce(movement*Vector2.right);
         }
 
         //Clamp the fall speed
-        if(rb.velocity.y < -maxFallSpeed){
+        if(rb.velocity.y < -maxFallSpeed && !isDashing){
             rb.velocity = new Vector2(rb.velocity.x, -maxFallSpeed);
         }
 
+        //Check if the player is on wall
+        if(isOnWall()){
+            rb.velocity = new Vector2(rb.velocity.x, -wallSlide);
+        }
     }
 
     void JumpHandler (){
@@ -126,7 +150,13 @@ public class CharacterController : MonoBehaviour
             rb.gravityScale = gravityScaleFalling;
             coyoteTimeTimer = 0f;
         }
+
+        //Handle walljump
+        if(jumpPressed && wallJumpTimeTimer>0){
+            WallJump();
+        }
     }
+
 
     void InputHandler(){
         move = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
@@ -148,8 +178,40 @@ public class CharacterController : MonoBehaviour
         return false;
     }
 
+    bool isOnWall(){
+        Vector2 position = transform.position;
+        Vector2 direction = Vector2.right;
+        float rayDistance = 1f;
+
+        RaycastHit2D hit = Physics2D.Raycast(position, -direction,rayDistance,wallLayer);
+        if(hit.collider!= null && move.x < -0.5 && isFacingRight && rb.velocity.y < apexModifier){
+            isWallSliding  = true;
+            Debug.Log("Walled Left");
+            return true;
+        }
+        RaycastHit2D hit2 = Physics2D.Raycast(position, direction,rayDistance,wallLayer);
+        if(hit2.collider!= null && move.x > 0.5 && !isFacingRight && rb.velocity.y < apexModifier){
+            isWallSliding  = true;
+            Debug.Log("Walled Right");
+            return true;
+        }
+        isWallSliding = false;
+        return false;
+    }
+
     void Jump(){
         rb.velocity = new Vector2(rb.velocity.x, jumpStrength);
+        dustParticles.Play();
+    }
+
+    void WallJump(){
+        dustParticles.Play();
+        if(isWallSliding){
+            rb.velocity = new Vector2(-transform.localScale.x * wallJumpStrengthX, wallJumpStrengthY);
+        }
+        else{
+            rb.velocity = new Vector2(rb.velocity.x, wallJumpStrengthY);
+        }
     }
 
     void FlipThePlayer(){
@@ -157,8 +219,11 @@ public class CharacterController : MonoBehaviour
         currentScale.x *= -1;
         transform.localScale = currentScale;
 
-        isFacingRight = !isFacingRight;
+        if(isGrounded()){
+            dustParticles.Play();
+        }
 
+        isFacingRight = !isFacingRight;
     }
 
     IEnumerator Dash(Vector2 dir){
