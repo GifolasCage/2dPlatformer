@@ -162,7 +162,7 @@ public class CharacterController : MonoBehaviour
         }
 
         //Handle extra jumps
-        if(jumpPressed && !isGrounded() && !isWallSliding){
+        if(jumpPressed && coyoteTimeTimer < 0 && !isWallSliding){
             if(extraJumpCount>0){
                 extraJumpCount -= 1;
                 ExtraJump();
