@@ -6,6 +6,7 @@ public class DoorScript : MonoBehaviour
 {
     private PlayerItemManager playerItemScript;
     private GameManager gameManagerScript;
+    private BoxCollider2D doorCollider;
 
     [Header("Door color: Red, Blue or Green")]
     [SerializeField] private string doorColor;
@@ -14,6 +15,7 @@ public class DoorScript : MonoBehaviour
     {
         playerItemScript = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerItemManager>();
         gameManagerScript = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
+        doorCollider = GetComponent<BoxCollider2D>();
     }
 
     // Update is called once per frame
@@ -24,7 +26,9 @@ public class DoorScript : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D col) {
         if(col.gameObject.tag == "Player"){
             if(playerItemScript.keyColor.Contains(doorColor)){
-                gameManagerScript.Win();
+                gameManagerScript.doorsTaken += 1;
+                doorCollider.enabled = false;
+                gameManagerScript.CheckDoors();
             }
             else{
                 Debug.Log("Door is locked!");

@@ -4760,7 +4760,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9566,7 +9566,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9663,7 +9663,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9754,7 +9754,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9828,7 +9828,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9945,24 +9945,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dashCount: 0
   moveSpeed: 25
-  jumpStrength: 32
-  jumpBuffer: 0.1
-  coyoteTime: 0.1
+  maxFallSpeed: 30
+  maxHorizontalSpeed: 30
+  acceleration: 10
+  deAcceleration: 20
+  wallSlide: 1
+  velPower: 1
   gravityScaleGrounded: 7
   gravityScaleFalling: 18
+  jumpStrength: 32
+  extraJumpStrength: 30
+  wallJumpStrengthY: 30
+  wallJumpStrengthX: 30
+  maxExtraJumpCount: 1
+  jumpBuffer: 0.1
+  coyoteTime: 0.1
+  wallJumpTime: 0.1
   apexModifier: 22
-  maxFallSpeed: 30
   dashPower: 20
   dashTime: 0.2
   maxDashCount: 1
-  acceleration: 10
-  deAcceleration: 20
-  velPower: 1
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 0
   dashParticles: {fileID: 144612210}
   dustParticles: {fileID: 1515494936}
+  snowParticlesTransform: {fileID: 0}
 --- !u!1 &3727307888102181794
 GameObject:
   m_ObjectHideFlags: 0
@@ -10014,7 +10025,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

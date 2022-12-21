@@ -54,7 +54,8 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private ParticleSystem dashParticles;
     [SerializeField] private ParticleSystem dustParticles;
     [SerializeField] private Transform snowParticlesTransform;
-    // Start is called before the first frame update
+
+   
     void Awake(){
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -162,7 +163,7 @@ public class CharacterController : MonoBehaviour
         }
 
         //Handle extra jumps
-        if(jumpPressed && coyoteTimeTimer < 0 && !isWallSliding){
+        if(jumpPressed && coyoteTimeTimer < 0 && wallJumpTimeTimer < 0){
             if(extraJumpCount>0){
                 extraJumpCount -= 1;
                 ExtraJump();
@@ -274,5 +275,8 @@ public class CharacterController : MonoBehaviour
         else{
             spriteRenderer.color = Color.gray;
         }
+    }
+    public void StopMoving(){
+        rb.velocity = Vector2.zero;
     }
 }
