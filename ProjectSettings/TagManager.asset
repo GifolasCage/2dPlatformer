@@ -7,6 +7,7 @@ TagManager:
   - GameManager
   - Checkpoint
   - Door
+  - Key
   layers:
   - Default
   - TransparentFX

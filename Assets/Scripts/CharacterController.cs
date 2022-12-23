@@ -7,6 +7,7 @@ public class CharacterController : MonoBehaviour
 {
     private Vector2 move;
     private Rigidbody2D rb;
+    
     private SpriteRenderer spriteRenderer;
     
     private bool jumpPressed;
@@ -19,6 +20,7 @@ public class CharacterController : MonoBehaviour
     private Vector2 dashDir;
     private bool isFacingRight;
     private bool isWallSliding;
+    private bool canMove = true;
     public int dashCount;
     private int extraJumpCount;
     private float lastVelocity;
@@ -54,11 +56,14 @@ public class CharacterController : MonoBehaviour
     [SerializeField] private ParticleSystem dashParticles;
     [SerializeField] private ParticleSystem dustParticles;
     [SerializeField] private Transform snowParticlesTransform;
+    [SerializeField] private GameObject sprite;
+
+    [SerializeField] private Animator playerAnimator;
 
    
     void Awake(){
         rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer = sprite.GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -67,6 +72,7 @@ public class CharacterController : MonoBehaviour
         JumpHandler();
         ChangeColor();
         MoveSnow();
+        AnimatePlayer();
 
         if(move.x < 0 && !isFacingRight && !isWallSliding){
             FlipThePlayer();
@@ -116,6 +122,13 @@ public class CharacterController : MonoBehaviour
         }
     }
 
+    private void AnimatePlayer()
+    {
+        //Player animation
+        if(isGrounded() && move.x != 0) playerAnimator.SetTrigger("Run");
+        if(isGrounded() && move.x == 0) playerAnimator.SetTrigger("Idle");
+    }
+
     private void MoveSnow()
     {
         snowParticlesTransform.position = new Vector3(transform.position.x, transform.position.y + 20f, 0f);
@@ -127,7 +140,7 @@ public class CharacterController : MonoBehaviour
         float accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? acceleration : deAcceleration;
         float movement = Mathf.Pow(Mathf.Abs(speedDiff) * accelRate, velPower) * Mathf.Sign(speedDiff);
         //Handle horizontal movement
-        if(!isDashing){
+        if(!isDashing && canMove){
             rb.AddForce(movement*Vector2.right);
         }
 
@@ -183,10 +196,12 @@ public class CharacterController : MonoBehaviour
 
     //Gather input
     void InputHandler(){
-        move = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        jumpPressed = Input.GetButtonDown("Jump");
-        jumpReleased = Input.GetButtonUp("Jump");
-        dashPressed = Input.GetButtonDown("Fire1");
+        if(canMove){
+            move = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            jumpPressed = Input.GetButtonDown("Jump");
+            jumpReleased = Input.GetButtonUp("Jump");
+            dashPressed = Input.GetButtonDown("Fire1");
+        }
     }
 
     //Check if the player is grounded.
@@ -226,11 +241,13 @@ public class CharacterController : MonoBehaviour
     void Jump(){
         rb.velocity = new Vector2(rb.velocity.x, jumpStrength);
         dustParticles.Play();
+        playerAnimator.SetTrigger("Jump");
     }
 
     void ExtraJump(){
         rb.velocity = new Vector2(rb.velocity.x, extraJumpStrength);
         dustParticles.Play();
+        playerAnimator.SetTrigger("Jump");
     }
 
     void WallJump(){
@@ -258,6 +275,7 @@ public class CharacterController : MonoBehaviour
 
     IEnumerator Dash(Vector2 dir){
         isDashing = true;
+        playerAnimator.SetTrigger("Dash");
         dashParticles.Play();
         rb.velocity = new Vector2(rb.velocity.x,0f);
         rb.AddForce(dashPower * dir, ForceMode2D.Impulse);
@@ -276,7 +294,15 @@ public class CharacterController : MonoBehaviour
             spriteRenderer.color = Color.gray;
         }
     }
+
     public void StopMoving(){
+        StartCoroutine(StopInput());
+    }
+
+    IEnumerator StopInput(){
+        canMove = false;
         rb.velocity = Vector2.zero;
+        yield return new WaitForSeconds(0.4f);
+        canMove = true;
     }
 }

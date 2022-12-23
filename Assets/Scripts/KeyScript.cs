@@ -52,4 +52,10 @@ public class KeyScript : MonoBehaviour
             playerItemScript.keyColor.Add(keyColor);
         }
     }
+
+    public void DestroyKey(string color){
+        if(color == keyColor){
+            Destroy(gameObject);
+        }
+    }
 }

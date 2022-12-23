@@ -25,12 +25,12 @@ public class GameManager : MonoBehaviour
     private void SetUpGame()
     {
         if(playerItemScript.checkpointPosition.Count == 0){
-            player.transform.position = playerStart.position;
             characterControllerScript.StopMoving();
+            player.transform.position = playerStart.position;
         }
         else{
-            player.transform.position = playerItemScript.checkpointPosition[playerItemScript.checkpointPosition.Count-1];
             characterControllerScript.StopMoving();
+            player.transform.position = playerItemScript.checkpointPosition[playerItemScript.checkpointPosition.Count-1];
         }
     }
 
