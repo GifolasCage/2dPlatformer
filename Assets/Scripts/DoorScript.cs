@@ -14,6 +14,7 @@ public class DoorScript : MonoBehaviour
 
     [Header("Door color: Red, Blue or Green")]
     [SerializeField] private string doorColor;
+    [SerializeField] private Sprite[] doorSprite;
 
 
     void Start()
@@ -23,6 +24,18 @@ public class DoorScript : MonoBehaviour
         keyObject = GameObject.FindGameObjectsWithTag("Key");
         doorCollider = GetComponent<BoxCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if(doorColor == "Red"){
+            spriteRenderer.sprite = doorSprite[0];
+        }
+        else if(doorColor == "Blue"){
+            spriteRenderer.sprite = doorSprite[1];
+        }
+        else if(doorColor == "Green"){
+            spriteRenderer.sprite = doorSprite[2];
+        }
+        else{
+            Debug.Log("Cant change sprite!");
+        }
 
         //Find all the keys in the scene and add them to a list.
         for (int i = 0; i < keyObject.Length; i++)
@@ -49,7 +62,7 @@ public class DoorScript : MonoBehaviour
                     key.DestroyKey(doorColor);
                 }
 
-                spriteRenderer.color = Color.grey;
+                spriteRenderer.sprite = doorSprite[3];
             }
             else{
                 Debug.Log("Door is locked!");

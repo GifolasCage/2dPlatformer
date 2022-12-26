@@ -125,8 +125,17 @@ public class CharacterController : MonoBehaviour
     private void AnimatePlayer()
     {
         //Player animation
-        if(isGrounded() && move.x != 0) playerAnimator.SetTrigger("Run");
-        if(isGrounded() && move.x == 0) playerAnimator.SetTrigger("Idle");
+        if(isGrounded() && move.x != 0){
+        playerAnimator.SetTrigger("Run");
+        //playerAnimator.speed = Mathf.Clamp(Mathf.Abs(move.x) * 1.5f,0.3f,2f);
+        }
+        else{
+            playerAnimator.speed = 1f;
+        }
+
+        if(isGrounded() && move.x == 0) {
+            playerAnimator.SetTrigger("Idle");
+        }
     }
 
     private void MoveSnow()
@@ -288,7 +297,7 @@ public class CharacterController : MonoBehaviour
     private void ChangeColor()
     {
         if(dashCount>0){
-            spriteRenderer.color = Color.blue;
+            spriteRenderer.color = Color.white;
         }
         else{
             spriteRenderer.color = Color.gray;

@@ -9,10 +9,12 @@ public class KeyScript : MonoBehaviour
     private Vector3 nextPosition;
     private bool isTaken;
     private Transform playerTransform;
+    private SpriteRenderer spriteRenderer;
     private PlayerItemManager playerItemScript;
     [SerializeField] float moveSpeed = 15f;
     [SerializeField] private Vector3 playerFollowOffset;
     [SerializeField] private Vector3 keyScaleAfterTaken;
+    [SerializeField] private Sprite[] keySprite;
     [Header("Keycolor: Red, Blue or Green")]
     [SerializeField] private string keyColor;
     // Start is called before the first frame update
@@ -20,6 +22,20 @@ public class KeyScript : MonoBehaviour
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         playerItemScript = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerItemManager>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if(keyColor == "Red"){
+            spriteRenderer.sprite = keySprite[0];
+        }
+        else if(keyColor == "Blue"){
+            spriteRenderer.sprite = keySprite[1];
+        }
+        else if(keyColor == "Green"){
+            spriteRenderer.sprite = keySprite[2];
+        }
+        else{
+            Debug.Log("Cant change sprite!");
+        }
 
         pos1 = transform.position.y + 0.1f;
         pos2 = transform.position.y - 0.1f;
