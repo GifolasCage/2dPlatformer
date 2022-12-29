@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class CharacterController : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class CharacterController : MonoBehaviour
     private bool isFacingRight;
     private bool isWallSliding;
     private bool canMove = true;
+    private bool isJumping = false;
+    private bool wasGrounded = false;
     public int dashCount;
     private int extraJumpCount;
     private float lastVelocity;
@@ -73,6 +76,7 @@ public class CharacterController : MonoBehaviour
         ChangeColor();
         MoveSnow();
         AnimatePlayer();
+        HasLanded();
 
         if(move.x < 0 && !isFacingRight && !isWallSliding){
             FlipThePlayer();
@@ -122,22 +126,23 @@ public class CharacterController : MonoBehaviour
         }
     }
 
-    private void AnimatePlayer()
+    private void HasLanded()
     {
-        //Player animation
-        if(isGrounded() && move.x != 0){
-        playerAnimator.SetTrigger("Run");
-        //playerAnimator.speed = Mathf.Clamp(Mathf.Abs(move.x) * 1.5f,0.3f,2f);
-        }
-        else{
-            playerAnimator.speed = 1f;
-        }
-
-        if(isGrounded() && move.x == 0) {
-            playerAnimator.SetTrigger("Idle");
+        if(rb.velocity.y<0 && isGrounded()){
+            isJumping = false;
         }
     }
 
+    private void AnimatePlayer()
+    {
+        //Player animation
+        if(isGrounded() && !isDashing){
+        playerAnimator.SetFloat("Speed", Mathf.Abs(move.x));
+        }
+        playerAnimator.SetBool("isDashing", isDashing);
+        playerAnimator.SetBool("isJumping", isJumping);
+
+    }
     private void MoveSnow()
     {
         snowParticlesTransform.position = new Vector3(transform.position.x, transform.position.y + 20f, 0f);
@@ -220,7 +225,7 @@ public class CharacterController : MonoBehaviour
         float rayDistance = 1f;
 
         RaycastHit2D hit = Physics2D.Raycast(position, direction,rayDistance,groundLayer | wallLayer);
-        if(hit.collider!= null){
+        if(hit.collider != null){
             extraJumpCount = maxExtraJumpCount;
             return true;
         }
@@ -234,13 +239,15 @@ public class CharacterController : MonoBehaviour
         float rayDistance = 1f;
 
         RaycastHit2D hit = Physics2D.Raycast(position, -direction,rayDistance,wallLayer);
-        if(hit.collider!= null && move.x < -0.5 && isFacingRight && rb.velocity.y < apexModifier){
+        if(hit.collider!= null && move.x < -0.5 && isFacingRight && rb.velocity.y < apexModifier && coyoteTimeTimer<0){
             isWallSliding  = true;
+            isJumping = false;
             return true;
         }
         RaycastHit2D hit2 = Physics2D.Raycast(position, direction,rayDistance,wallLayer);
-        if(hit2.collider!= null && move.x > 0.5 && !isFacingRight && rb.velocity.y < apexModifier){
+        if(hit2.collider!= null && move.x > 0.5 && !isFacingRight && rb.velocity.y < apexModifier && coyoteTimeTimer<0){
             isWallSliding  = true;
+            isJumping = false;
             return true;
         }
         isWallSliding = false;
@@ -250,13 +257,12 @@ public class CharacterController : MonoBehaviour
     void Jump(){
         rb.velocity = new Vector2(rb.velocity.x, jumpStrength);
         dustParticles.Play();
-        playerAnimator.SetTrigger("Jump");
+        isJumping = true;
     }
 
     void ExtraJump(){
         rb.velocity = new Vector2(rb.velocity.x, extraJumpStrength);
         dustParticles.Play();
-        playerAnimator.SetTrigger("Jump");
     }
 
     void WallJump(){
@@ -284,7 +290,7 @@ public class CharacterController : MonoBehaviour
 
     IEnumerator Dash(Vector2 dir){
         isDashing = true;
-        playerAnimator.SetTrigger("Dash");
+        isJumping = false;
         dashParticles.Play();
         rb.velocity = new Vector2(rb.velocity.x,0f);
         rb.AddForce(dashPower * dir, ForceMode2D.Impulse);

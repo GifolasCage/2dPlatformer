@@ -8,6 +8,7 @@ TagManager:
   - Checkpoint
   - Door
   - Key
+  - CMCamera
   layers:
   - Default
   - TransparentFX

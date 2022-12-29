@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -2
-  m_Sprite: {fileID: 21300000, guid: d6a6894466005024c996c966b5303af8, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 14efb2a6899bad544acb2367f810a37a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -123,7 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 79c5f02e3ecc2c44ab96717aaa0cc840, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  doorColor: Red
+  doorColor: Green
   doorSprite:
   - {fileID: 21300000, guid: 8bfe5e160b5198e4080a1ad0bc35495d, type: 3}
   - {fileID: 21300000, guid: d6a6894466005024c996c966b5303af8, type: 3}
