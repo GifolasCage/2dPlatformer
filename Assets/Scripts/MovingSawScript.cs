@@ -6,6 +6,7 @@ public class MovingSawScript : MonoBehaviour
 {
     [SerializeField] private Transform pos1, pos2, sawBlade;
     [SerializeField] private float moveSpeed, rotationSpeed;
+    [SerializeField] private LineRenderer lineRenderer;
     Vector3 nextPos;
     private bool isMoving = true;
     // Start is called before the first frame update
@@ -13,6 +14,9 @@ public class MovingSawScript : MonoBehaviour
     {
         sawBlade.position = pos1.position;
         nextPos = pos2.position;
+
+        lineRenderer = GetComponent<LineRenderer>();
+        DrawLine();
     }
 
     // Update is called once per frame
@@ -30,7 +34,9 @@ public class MovingSawScript : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos() {
-        Gizmos.DrawLine(pos1.position,pos2.position);
+    private void DrawLine(){
+        lineRenderer.SetPosition(0, pos1.position);
+        lineRenderer.SetPosition(1, pos2.position);
     }
+
 }

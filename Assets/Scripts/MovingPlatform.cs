@@ -7,7 +7,7 @@ public class MovingPlatform : MonoBehaviour
     [SerializeField] private Transform pos1, pos2, platform;
     [SerializeField] private float speed;
     Vector3 nextPos;
-    private bool isMoving = true;
+    private bool isMoving = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -27,6 +27,10 @@ public class MovingPlatform : MonoBehaviour
         if(isMoving){
         platform.position = Vector3.MoveTowards(platform.position,nextPos,speed*Time.deltaTime);
         }
+    }
+
+    public void StartMoving(){
+        isMoving = true;
     }
 
     private void OnDrawGizmos() {

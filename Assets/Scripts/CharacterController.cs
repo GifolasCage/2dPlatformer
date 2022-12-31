@@ -7,7 +7,7 @@ using UnityEngine.Events;
 public class CharacterController : MonoBehaviour
 {
     private Vector2 move;
-    private Rigidbody2D rb;
+    public Rigidbody2D rb;
     
     private SpriteRenderer spriteRenderer;
     
@@ -23,7 +23,7 @@ public class CharacterController : MonoBehaviour
     private bool isWallSliding;
     private bool canMove = true;
     private bool isJumping = false;
-    private bool wasGrounded = false;
+    private bool isFalling = false;
     public int dashCount;
     private int extraJumpCount;
     private float lastVelocity;
@@ -78,11 +78,17 @@ public class CharacterController : MonoBehaviour
         AnimatePlayer();
         HasLanded();
 
+        //Flip the sprite
         if(move.x < 0 && !isFacingRight && !isWallSliding){
             FlipThePlayer();
         }
         if(move.x > 0 && isFacingRight && !isWallSliding){
             FlipThePlayer();
+        }
+
+        //check if player is falling
+        if(!isGrounded() && rb.velocity.y < 0 && !isOnWall() && !isJumping){
+            Debug.Log("Youre falling!");
         }
 
         //Check if the player is grounded
@@ -96,7 +102,7 @@ public class CharacterController : MonoBehaviour
         }    
 
         //Change gravity if the y velocity is lower than the set apex.
-        if(rb.velocity.y < apexModifier && !isGrounded() && !isDashing){
+        if(rb.velocity.y < apexModifier && coyoteTimeTimer<0 && !isDashing){
             rb.gravityScale = gravityScaleFalling;
         }
 
