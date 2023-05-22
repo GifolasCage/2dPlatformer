@@ -4,4 +4,4 @@ Personal project attempting to create the perfect 2d platform controller and for
 All assets are original. Pixel art created in Aseprite. Music and SFX created in FL Studio.
 
 # Demo
-![](https://github.com/Your_Repository_Name/Your_GIF_Name.gif)
+![](https://github.com/jorgeneikemo/2dPlatformer/blob/master/documentation/demo.gif)
