@@ -7,7 +7,7 @@ using UnityEngine.Events;
 public class CharacterController : MonoBehaviour
 {
     private Vector2 move;
-    public Rigidbody2D rb;
+    private Rigidbody2D rb;
     
     private SpriteRenderer spriteRenderer;
     
@@ -88,7 +88,12 @@ public class CharacterController : MonoBehaviour
 
         //check if player is falling
         if(!isGrounded() && rb.velocity.y < 0 && !isOnWall() && !isJumping){
-            Debug.Log("Youre falling!");
+            isFalling = true;
+            playerAnimator.SetBool("isFalling", true);
+        }
+        else{
+            isFalling = false;
+            playerAnimator.SetBool("isFalling", false);
         }
 
         //Check if the player is grounded
@@ -318,6 +323,21 @@ public class CharacterController : MonoBehaviour
 
     public void StopMoving(){
         StartCoroutine(StopInput());
+    }
+
+    public void ChangeInterp(){
+        if(rb.interpolation == RigidbodyInterpolation2D.None){
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        }
+        else{
+            rb.interpolation = RigidbodyInterpolation2D.None;
+        }
+    }
+
+    public void Die(){
+        playerAnimator.SetTrigger("Die");
+        rb.velocity = Vector2.zero;
+        canMove = false;
     }
 
     IEnumerator StopInput(){

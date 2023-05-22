@@ -39,4 +39,8 @@ public class MovingSawScript : MonoBehaviour
         lineRenderer.SetPosition(1, pos2.position);
     }
 
+    private void OnDrawGizmos() {
+        Gizmos.DrawLine(pos1.position,pos2.position);
+    }
+
 }

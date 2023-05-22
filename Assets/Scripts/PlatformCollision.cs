@@ -22,13 +22,13 @@ public class PlatformCollision : MonoBehaviour
         if(col.gameObject.tag == "Player"){
             col.collider.transform.SetParent(this.transform);
             onPlatform.Invoke();
-            characterController.rb.interpolation = RigidbodyInterpolation2D.None;
+            characterController.ChangeInterp();
         }
     }
     private void OnCollisionExit2D(Collision2D col) {
         if(col.gameObject.tag == "Player"){
             col.collider.transform.SetParent(null);
-            characterController.rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            characterController.ChangeInterp();
         }
     }
 }

@@ -43,18 +43,17 @@ public class DoorScript : MonoBehaviour
             keyScript.Add(keyObject[i].GetComponent<KeyScript>());
         }
     }
-
-    private void OnTriggerEnter2D(Collider2D col) {
+    private void OnCollisionEnter2D(Collision2D col) {
         if(col.gameObject.tag == "Player"){
             OpenDoor();
-        }
+        } 
     }
 
     private void OpenDoor(){
             if(playerItemScript.keyColor.Contains(doorColor)){
                 gameManagerScript.doorsTaken += 1;
                 doorCollider.enabled = false;
-                gameManagerScript.CheckDoors();
+                //gameManagerScript.CheckDoors();
 
                 //Loop through all the keys and remove the oen that corresponds with the current door;
                 foreach (KeyScript key in keyScript)

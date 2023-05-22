@@ -1,9 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
-public class SpikeScript : MonoBehaviour
+public class helloscript : MonoBehaviour
 {
     private GameManager gameManagerScript;
     
@@ -14,9 +13,7 @@ public class SpikeScript : MonoBehaviour
         gameManagerScript = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
     }
 
-    private void OnTriggerEnter2D(Collider2D other) {
-        if(other.gameObject.tag == "Player"){
-            gameManagerScript.Die();
-        }
+    private void OnCollisionEnter2D(Collision2D other) {
+        gameManagerScript.Die();
     }
 }

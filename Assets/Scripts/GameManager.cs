@@ -2,17 +2,21 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private Transform playerStart;
     [SerializeField] private GameObject player;
+    [SerializeField] private UnityEvent die;
+    [SerializeField] private float restartTime = 2f;
 
     private PlayerItemManager playerItemScript;
     private CharacterController characterControllerScript;
     private GameObject[] doors;
     public int doorsTaken;
+    
 
     private void Start() {
         playerItemScript = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerItemManager>();
@@ -35,8 +39,15 @@ public class GameManager : MonoBehaviour
     }
 
     public void Die(){
+        die.Invoke();
+        StartCoroutine(WaitForRestart());
+    }
+
+    IEnumerator WaitForRestart(){
+        yield return new WaitForSeconds(restartTime);
         SetUpGame();
     }
+
     public void Win(){
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
@@ -50,6 +61,9 @@ public class GameManager : MonoBehaviour
     private void Update() {
         if(Input.GetKeyDown(KeyCode.R)){
             Die();
+        }
+        if(Input.GetKeyDown(KeyCode.Escape)){
+            Application.Quit();
         }
     }
 }
